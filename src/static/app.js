@@ -41,6 +41,76 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  // Fetch and display participants for each activity
+  function loadParticipants(activityName, participantsListElement) {
+    fetch(`/activities/${activityName}/participants`)
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Failed to fetch participants");
+        }
+        return response.json();
+      })
+      .then((data) => {
+        participantsListElement.innerHTML = ""; // Clear existing list
+        data.participants.forEach((participant) => {
+          const listItem = document.createElement("li");
+          listItem.textContent = participant;
+          participantsListElement.appendChild(listItem);
+        });
+      })
+      .catch((error) => {
+        console.error("Error loading participants:", error);
+      });
+  }
+
+  // Update activity cards to include participants
+  function displayActivities(activities) {
+    activitiesList.innerHTML = ""; // Clear existing activities
+
+    Object.keys(activities).forEach((activityName) => {
+      const activity = activities[activityName];
+
+      const card = document.createElement("div");
+      card.className = "activity-card";
+
+      const title = document.createElement("h4");
+      title.textContent = activityName;
+      card.appendChild(title);
+
+      const description = document.createElement("p");
+      description.textContent = activity.description;
+      card.appendChild(description);
+
+      const participantsHeader = document.createElement("h5");
+      participantsHeader.textContent = "Participants:";
+      card.appendChild(participantsHeader);
+
+      const participantsList = document.createElement("ul");
+      participantsList.className = "participants-list";
+      card.appendChild(participantsList);
+
+      // Load participants for this activity
+      loadParticipants(activityName, participantsList);
+
+      activitiesList.appendChild(card);
+    });
+  }
+
+  // Fetch and display activities
+  fetch("/activities")
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error("Failed to fetch activities");
+      }
+      return response.json();
+    })
+    .then((data) => {
+      displayActivities(data);
+    })
+    .catch((error) => {
+      console.error("Error loading activities:", error);
+    });
+
   // Handle form submission
   signupForm.addEventListener("submit", async (event) => {
     event.preventDefault();
